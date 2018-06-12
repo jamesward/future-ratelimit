@@ -49,6 +49,18 @@ class FutureRateLimitSpec extends AsyncWordSpec with MustMatchers {
         result must equal (items)
       }
     }
+    "work when there the number of items doesn't align to the rate" in {
+      val items = 1 to 5
+
+      def runner[A](a: A) = Future.successful(a)
+
+      val startTime = System.nanoTime()
+
+      runWithCreateRateLimit(2, 1.second)(items)(runner).map { result =>
+        Duration.fromNanos(System.nanoTime() - startTime) must (be > 2.seconds and be < 3.seconds)
+        result must equal (items)
+      }
+    }
   }
 
 }
